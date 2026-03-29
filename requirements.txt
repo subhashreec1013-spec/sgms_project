@@ -1,6 +1,5 @@
 Flask
 flask-mysqldb
-mysqlclient
+gunicorn
 Werkzeug
 reportlab
-gunicorn
