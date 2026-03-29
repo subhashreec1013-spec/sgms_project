@@ -1,10 +1,13 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Grievance System</title>
+    <title>SGMS Portal</title>
 
     <!-- Bootstrap -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
 
     <style>
         body {
@@ -14,7 +17,7 @@
         }
 
         .overlay {
-            background-color: rgba(255, 255, 255, 0.3);
+            background-color: rgba(0, 0, 0, 0.4);
             min-height: 100vh;
             display: flex;
             justify-content: center;
@@ -23,8 +26,12 @@
 
         .home-card {
             padding: 40px;
-            border-radius: 15px;
+            border-radius: 20px;
             text-align: center;
+            backdrop-filter: blur(15px);
+            background: rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255,255,255,0.3);
+            animation: fadeIn 1s ease-in-out;
         }
 
         .logo {
@@ -34,9 +41,46 @@
         }
 
         .btn-custom {
-            width: 200px;
+            width: 220px;
             margin: 10px;
             font-size: 18px;
+            border-radius: 8px;
+        }
+
+        .btn-student {
+            background: linear-gradient(45deg, #00c6ff, #0072ff);
+            color: white;
+            border: none;
+        }
+
+        .btn-admin {
+            background: linear-gradient(45deg, #434343, #000000);
+            color: white;
+            border: none;
+        }
+
+        .btn-custom:hover {
+            transform: scale(1.05);
+            transition: 0.3s;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .footer {
+            position: absolute;
+            bottom: 10px;
+            width: 100%;
+            text-align: center;
+            color: white;
         }
     </style>
 </head>
@@ -46,17 +90,34 @@
 <div class="overlay">
     <div class="card shadow home-card">
 
-        <!-- SRM Logo -->
+        <!-- LOGO -->
         <img src="{{ url_for('static', filename='images/logo.png') }}" class="logo mb-3">
 
-        <h3 class="mb-4">Student Grievance Management System</h3>
+        <!-- TITLE -->
+        <h3 class="text-white">Student Grievance Management System</h3>
 
-        <!-- Buttons -->
-        <a href="/login" class="btn btn-primary btn-custom">Student Login</a>
+        <!-- SUBTITLE -->
+        <p class="text-light mb-4">
+            A smart platform for resolving student issues efficiently
+        </p>
+
+        <!-- BUTTONS -->
+        <a href="/login" class="btn btn-student btn-custom">
+            <i class="bi bi-person"></i> Student Login
+        </a>
+
         <br>
-        <a href="/admin_login" class="btn btn-dark btn-custom">Admin Login</a>
+
+        <a href="/admin_login" class="btn btn-admin btn-custom">
+            <i class="bi bi-shield-lock"></i> Admin Login
+        </a>
 
     </div>
+</div>
+
+<!-- FOOTER -->
+<div class="footer">
+    <small>© 2026 SRM Institute | Developed by Subha Shree</small>
 </div>
 
 </body>
