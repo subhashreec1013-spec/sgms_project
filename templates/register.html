@@ -3,50 +3,84 @@
 <head>
     <title>Student Registration</title>
 
-    <!-- Bootstrap CSS -->
+    <!-- Bootstrap -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-
-    <!-- Bootstrap Icons -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
 
-   <style>
-    body {
-        margin: 0;
-        background: url("{{ url_for('static', filename='images/bg.jpg') }}") no-repeat center center fixed;
-        background-size: cover;
-    }
+<style>
 
-    .overlay {
-        background-color: rgba(255, 255, 255, 0.3);
-        min-height: 100vh;   /* changed from 80vh */
-        display: flex;
-        justify-content: center;
-        align-items: center;
-    }
+/* ===== BACKGROUND ===== */
+body {
+    margin: 0;
+    background: url("{{ url_for('static', filename='images/bg.jpg') }}") no-repeat center center fixed;
+    background-size: cover;
+    font-family: 'Segoe UI', sans-serif;
+}
 
-    .register-card {
-        width: 420px;
-        padding: 25px;
-        border-radius: 15px;
-        backdrop-filter: blur(10px);
-    }
+/* ===== OVERLAY ===== */
+.overlay {
+    background: rgba(0,0,0,0.4);
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
 
-    .logo {
-        width: 80px;
-        display: block;
-        margin: 0 auto 15px auto;
-    }
+/* ===== GLASS CARD ===== */
+.register-card {
+    width: 450px;
+    padding: 30px;
+    border-radius: 20px;
+    backdrop-filter: blur(12px);
+    background: rgba(255,255,255,0.2);
+    border: none;
+    color: white;
+    animation: fadeIn 1s ease-in-out;
+}
 
-    /* Remove browser default eye icon */
-    input[type="password"]::-ms-reveal,
-    input[type="password"]::-ms-clear {
-        display: none;
-    }
+/* ===== LOGO ===== */
+.logo {
+    width: 85px;
+    display: block;
+    margin: 0 auto 15px auto;
+}
 
-    input[type="password"] {
-        appearance: none;
+/* ===== INPUT ===== */
+.form-control, .form-select {
+    background: rgba(255,255,255,0.85);
+    border-radius: 8px;
+}
+
+/* ===== BUTTON ===== */
+.btn-primary {
+    background: linear-gradient(45deg,#00c6ff,#0072ff);
+    border: none;
+}
+
+.btn-primary:hover {
+    transform: scale(1.05);
+    transition: 0.3s;
+}
+
+/* ===== ANIMATION ===== */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
     }
-    </style>
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Remove browser eye icon */
+input[type="password"]::-ms-reveal,
+input[type="password"]::-ms-clear {
+    display: none;
+}
+
+</style>
 </head>
 
 <body>
@@ -54,48 +88,49 @@
 <div class="overlay">
     <div class="card shadow-lg register-card">
 
-        <!-- College Logo -->
-        <img src="{{ url_for('static', filename='images/logo.png') }}" class="logo mb-3">
+        <!-- LOGO -->
+        <img src="{{ url_for('static', filename='images/logo.png') }}" class="logo">
 
-        <h4 class="text-center mb-4">Student Registration</h4>
+        <h4 class="text-center mb-3">📝 Student Registration</h4>
+        <p class="text-center text-light mb-4">Create your account to raise grievances</p>
 
         <form method="POST">
 
             <!-- Student ID -->
             <div class="mb-3">
-                <label>Student ID (15 characters)</label>
+                <label class="text-white">Student ID</label>
                 <input type="text" name="student_id" class="form-control" maxlength="15" required>
             </div>
 
             <!-- Name -->
             <div class="mb-3">
-                <label>Full Name</label>
+                <label class="text-white">Full Name</label>
                 <input type="text" name="name" class="form-control" required>
             </div>
 
-            <!-- College Email -->
+            <!-- Email -->
             <div class="mb-3">
-                <label>College Email</label>
+                <label class="text-white">College Email</label>
                 <input type="email" name="email" class="form-control"
                        pattern="^[a-zA-Z0-9._%+-]+@srmist\.edu\.in$"
-                       title="Use college email only (example@srmist.edu.in)"
+                       title="Use college email only"
                        required>
             </div>
 
-            <!-- Password with Eye Icon -->
+            <!-- Password -->
             <div class="mb-3 position-relative">
-                <label>Password</label>
+                <label class="text-white">Password</label>
                 <input type="password" name="password" id="password" class="form-control pe-5" required>
-                
+
                 <i class="bi bi-eye-slash position-absolute"
                    id="togglePassword"
-                   style="top: 38px; right: 15px; cursor: pointer;">
+                   style="top: 38px; right: 15px; cursor: pointer; color:black;">
                 </i>
             </div>
 
             <!-- Department -->
             <div class="mb-3">
-                <label>Select Department</label>
+                <label class="text-white">Department</label>
                 <select name="course" class="form-select" required>
                     <option value="">-- Select Department --</option>
                     <option>CSE</option>
@@ -117,7 +152,7 @@
 
             <!-- Year -->
             <div class="mb-3">
-                <label>Year</label>
+                <label class="text-white">Year</label>
                 <select name="year" class="form-select" required>
                     <option value="">-- Select Year --</option>
                     <option value="1">1</option>
@@ -127,27 +162,31 @@
                 </select>
             </div>
 
-            <button type="submit" class="btn btn-primary w-100">Register</button>
+            <!-- BUTTON -->
+            <button type="submit" class="btn btn-primary w-100 mb-2">
+                <i class="bi bi-person-plus"></i> Register
+            </button>
 
         </form>
 
         <div class="text-center mt-3">
-            <small>Already have an account? 
-                <a href="/login">Login here</a>
+            <small class="text-light">
+                Already have an account?
+                <a href="/login" class="text-info">Login here</a>
             </small>
         </div>
 
     </div>
 </div>
 
-<!-- Password Toggle Script -->
+<!-- Password Toggle -->
 <script>
 const togglePassword = document.querySelector('#togglePassword');
 const password = document.querySelector('#password');
 
 togglePassword.addEventListener('click', function () {
-    const type = password.getAttribute('type') === 'password' ? 'text' : 'password';
-    password.setAttribute('type', type);
+    const type = password.type === 'password' ? 'text' : 'password';
+    password.type = type;
 
     this.classList.toggle('bi-eye');
     this.classList.toggle('bi-eye-slash');
