@@ -89,20 +89,18 @@ def setup_db():
 
 from werkzeug.security import generate_password_hash
 
-@app.route('/reset_admin_passwords')
-def reset_admin_passwords():
+@app.route('/fix_admin_passwords')
+def fix_admin_passwords():
     cur = mysql.connection.cursor()
 
-    password = generate_password_hash("admin123")
+    new_password = generate_password_hash("admin123")
 
-    cur.execute("""
-    UPDATE admin SET password = %s
-    """, (password,))
+    cur.execute("UPDATE admin SET password = %s", (new_password,))
 
     mysql.connection.commit()
     cur.close()
 
-    return "All admin passwords reset to admin123 ✅"
+    return "All admin passwords fixed ✅"
 
 # ==========================
 # HOME
