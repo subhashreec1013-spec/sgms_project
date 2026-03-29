@@ -88,7 +88,7 @@
             <!-- Category -->
             <div class="mb-3">
                 <label class="form-label">Category</label>
-                <select name="category" class="form-select" required>
+                <select name="category" id="category" class="form-select" required>
                     <option value="">-- Select Category --</option>
                     <option>Academic</option>
                     <option>Finance</option>
@@ -104,18 +104,15 @@
             </div>
 
             <!-- Issue Type -->
-            <div class="mb-3">
+            <div class="mb-3" id="issueTypeDiv" style="display:none;">
                 <label class="form-label">Issue Type</label>
-                <select name="issue_type" class="form-select" required>
-                    <option value="general">General Issue</option>
-                    <option value="mentor">Complaint Against Mentor</option>
-                    <option value="hod">Complaint Against HOD</option>
-                </select>
-                <div class="info-text mt-1">
-                    System also performs automatic keyword analysis based on your description.
-                </div>
-            </div>
 
+                <select name="issue_type" id="issue_type" class="form-select">
+                   <option value="general">General Issue</option>
+                   <option value="mentor">Concern regarding Mentor</option>
+                   <option value="hod">Concern regarding HOD</option>
+                </select>
+            </div>
             <!-- Severity -->
             <div class="mb-3">
                 <label class="form-label">Severity Level</label>
@@ -133,7 +130,7 @@
                 <textarea name="description"
                           class="form-control"
                           rows="4"
-                          placeholder="Describe your issue clearly. Example: My mentor is not responding..."
+                          placeholder="Describe your issue clearly..."
                           required></textarea>
             </div>
 
@@ -149,6 +146,21 @@
 
     </div>
 </div>
+<script>
+const category = document.getElementById("category");
+const issueDiv = document.getElementById("issueTypeDiv");
+const issueSelect = document.getElementById("issue_type");
 
+category.addEventListener("change", function () {
+    if (this.value === "Faculty") {
+        issueDiv.style.display = "block";
+        issueSelect.setAttribute("required", "true");
+    } else {
+        issueDiv.style.display = "none";
+        issueSelect.removeAttribute("required");
+        issueSelect.value = "general";
+    }
+});
+</script>
 </body>
 </html>

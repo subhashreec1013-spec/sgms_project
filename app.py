@@ -321,7 +321,7 @@ def admin_performance():
         return redirect(url_for('admin_login'))
 
     # Only Super Admin allowed
-    if session['admin_level'] != 4:
+    if session.get('admin_level') != 4:
         return "Access Denied ❌"
 
     cur = mysql.connection.cursor()
@@ -330,35 +330,46 @@ def admin_performance():
     SELECT 
         a.name,
         d.dept_name,
+
         COUNT(gl.log_id) AS total_actions,
 
-        SUM(CASE 
-            WHEN gl.status = 'Resolved' 
+        COALESCE(SUM(CASE 
+            WHEN LOWER(gl.status) = 'resolved' 
             THEN 1 ELSE 0 
-        END) AS resolved_count,
+        END), 0) AS resolved_count,
 
-        SUM(CASE 
-            WHEN gl.status = 'Rejected' 
+        COALESCE(SUM(CASE 
+            WHEN LOWER(gl.status) = 'rejected' 
             THEN 1 ELSE 0 
-        END) AS rejected_count,
+        END), 0) AS rejected_count,
 
-        SUM(CASE 
-            WHEN gl.status = 'Escalated' 
+        COALESCE(SUM(CASE 
+            WHEN LOWER(gl.status) = 'escalated' 
             THEN 1 ELSE 0 
-        END) AS escalated_count
+        END), 0) AS escalated_count
 
     FROM admin a
-    LEFT JOIN department d ON a.dept_id = d.dept_id
-    LEFT JOIN grievance_log gl ON gl.action_by = a.admin_id
+
+    LEFT JOIN department d 
+        ON a.dept_id = d.dept_id
+
+    LEFT JOIN grievance_log gl 
+        ON gl.action_by = a.admin_id
 
     WHERE a.level != 4
-    GROUP BY a.admin_id
+
+    GROUP BY a.admin_id, a.name, d.dept_name
+
+    ORDER BY total_actions DESC
     """)
+
     performance = cur.fetchall()
     cur.close()
 
-    return render_template("admin_performance.html", performance=performance)
-
+    return render_template(
+        "admin_performance.html",
+        performance=performance
+    )
 # ==========================
 # RESOLVE / REJECT GRIEVANCE
 # ==========================
@@ -607,7 +618,7 @@ def raise_grievance():
 
         category = request.form['category']
         description = request.form['description']
-        issue_type = request.form['issue_type']
+        issue_type = request.form.get('issue_type', 'general')
 
         # 🔥 AI detection
         detected_dept, severity_level, auto_priority = smart_detect(description)

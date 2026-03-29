@@ -6,7 +6,6 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
 
 <style>
-
 body{
 background:#f4f6f9;
 font-family:'Segoe UI',sans-serif;
@@ -28,16 +27,6 @@ overflow:hidden;
 .btn{
 border-radius:8px;
 }
-
-.dashboard-title{
-font-weight:600;
-margin-bottom:20px;
-}
-
-.chart-box{
-height:280px;
-}
-
 </style>
 </head>
 
@@ -88,61 +77,36 @@ height:280px;
 <div class="col">
 <div class="card text-white bg-dark shadow p-3">
 <h6>Total</h6>
-<h3>{{ total }}</h3>
+<h3>{{ total | default(0) }}</h3>
 </div>
 </div>
 
 <div class="col">
 <div class="card text-white bg-secondary shadow p-3">
 <h6>Pending</h6>
-<h3>{{ pending }}</h3>
+<h3>{{ pending | default(0) }}</h3>
 </div>
 </div>
 
 <div class="col">
 <div class="card text-white bg-primary shadow p-3">
 <h6>In Progress</h6>
-<h3>{{ in_progress }}</h3>
+<h3>{{ in_progress | default(0) }}</h3>
 </div>
 </div>
 
 <div class="col">
 <div class="card text-white bg-success shadow p-3">
 <h6>Resolved</h6>
-<h3>{{ resolved }}</h3>
+<h3>{{ resolved | default(0) }}</h3>
 </div>
 </div>
 
 <div class="col">
 <div class="card text-white bg-danger shadow p-3">
 <h6>Rejected</h6>
-<h3>{{ rejected }}</h3>
+<h3>{{ rejected | default(0) }}</h3>
 </div>
-</div>
-
-</div>
-
-<!-- ================= CHART SECTION ================= -->
-<div class="row mb-4">
-
-<div class="col-md-6">
-<div class="card shadow p-3">
-<h5 class="text-center">Grievance Status Distribution</h5>
-<div style="height:260px;">
-<canvas id="statusChart"></canvas>
-</div>
-</div>
-</div>
-
-<div class="col-md-6">
-<div class="card shadow p-3">
-<h5 class="text-center">Overall Performance</h5>
-<div style="height:260px;">
-<canvas id="performanceChart"></canvas>
-</div>
-</div>
-</div>
-
 </div>
 
 </div>
@@ -154,14 +118,12 @@ Export PDF Report
 </a>
 {% endif %}
 
-<!-- ================= GRIEVANCE TABLE ================= -->
-<div class="container">
-
+<!-- ================= TABLE ================= -->
 <div class="card shadow p-4">
 
 <h5 class="mb-3">Department Grievances</h5>
 
-{% if grievances %}
+{% if grievances and grievances|length > 0 %}
 <div class="table-responsive">
 
 <table class="table table-bordered table-striped">
@@ -201,14 +163,17 @@ Export PDF Report
 </td>
 
 <td>
-{% if g[5] == "Pending" %}
+{% set status = g[5]|lower %}
+{% if status == "pending" %}
 <span class="badge bg-secondary">Pending</span>
-{% elif g[5] == "In Progress" %}
+{% elif status == "in progress" %}
 <span class="badge bg-primary">In Progress</span>
-{% elif g[5] == "Resolved" %}
+{% elif status == "resolved" %}
 <span class="badge bg-success">Resolved</span>
-{% elif g[5] == "Rejected" %}
+{% elif status == "rejected" %}
 <span class="badge bg-danger">Rejected</span>
+{% else %}
+<span class="badge bg-dark">{{ g[5] }}</span>
 {% endif %}
 </td>
 
@@ -217,26 +182,15 @@ Export PDF Report
 
 <td>
 
-<!-- SUPER ADMIN MONITORING ONLY -->
-{% if session['admin_level'] == 4 %}
+{% if session.get('admin_level') == 4 %}
 
 <span class="text-muted">Monitoring</span>
+<a href="/view_history/{{ g[0] }}" class="btn btn-sm btn-info mt-1 w-100">History</a>
 
-<a href="/view_history/{{ g[0] }}"
-class="btn btn-sm btn-info mt-1 w-100">
-History
-</a>
-
-<!-- OTHER ADMINS -->
-
-{% elif g[5]|lower in ["resolved","rejected"] %}
+{% elif status in ["resolved","rejected"] %}
 
 <span class="text-success fw-bold">✔ Completed</span>
-
-<a href="/view_history/{{ g[0] }}"
-class="btn btn-sm btn-info mt-1 w-100">
-History
-</a>
+<a href="/view_history/{{ g[0] }}" class="btn btn-sm btn-info mt-1 w-100">History</a>
 
 {% else %}
 
@@ -248,11 +202,9 @@ History
 <option value="Rejected">Reject</option>
 </select>
 
-<input type="text"
-name="remarks"
+<input type="text" name="remarks"
 class="form-control form-control-sm mb-1"
-placeholder="Enter remarks"
-required>
+placeholder="Enter remarks" required>
 
 <button type="submit" class="btn btn-sm btn-success w-100">
 Submit
@@ -260,19 +212,7 @@ Submit
 
 </form>
 
-{% if session['admin_level'] < 3 and session['admin_dept'] in [1,4,6] %}
-
-<a href="/escalate/{{ g[0] }}"
-class="btn btn-sm btn-warning mt-1 w-100">
-Escalate
-</a>
-
-{% endif %}
-
-<a href="/view_history/{{ g[0] }}"
-class="btn btn-sm btn-info mt-1 w-100">
-History
-</a>
+<a href="/view_history/{{ g[0] }}" class="btn btn-sm btn-info mt-1 w-100">History</a>
 
 {% endif %}
 
@@ -288,85 +228,12 @@ History
 </div>
 
 {% else %}
-<p>No grievances available.</p>
+<p class="text-muted">No grievances available.</p>
 {% endif %}
 
 </div>
 
 </div>
-
-<!-- ================= CHART SCRIPT ================= -->
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
-<script>
-
-const pending = {{ pending | default(0) }};
-const inProgress = {{ in_progress | default(0) }};
-const resolved = {{ resolved | default(0) }};
-const rejected = {{ rejected | default(0) }};
-const total = {{ total | default(0) }};
-
-/* ================= DOUGHNUT CHART ================= */
-
-new Chart(document.getElementById('statusChart'), {
-
-type: 'doughnut',
-
-data: {
-labels: ['Pending','In Progress','Resolved','Rejected'],
-
-datasets: [{
-data: [pending, inProgress, resolved, rejected],
-
-backgroundColor: [
-'#6c757d',
-'#0d6efd',
-'#198754',
-'#dc3545'
-]
-
-}]
-
-},
-
-options: {
-responsive:true,
-maintainAspectRatio:false,
-plugins:{
-legend:{ position:'bottom' }
-}
-
-}
-
-});
-
-/* ================= BAR CHART ================= */
-
-new Chart(document.getElementById('performanceChart'), {
-
-type:'bar',
-
-data:{
-labels:['Total','Resolved'],
-
-datasets:[{
-label:'Grievances',
-data:[total,resolved],
-backgroundColor:['#212529','#198754']
-}]
-},
-
-options:{
-responsive:true,
-maintainAspectRatio:false,
-scales:{
-y:{ beginAtZero:true }
-}
-}
-
-});
-
-</script>
 
 </body>
 </html>
