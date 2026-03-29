@@ -8,11 +8,11 @@ app.secret_key = "supersecretkey"
 # ==========================
 # DATABASE CONFIG
 # ==========================
-app.config['MYSQL_HOST'] = 'localhost'
-app.config['MYSQL_PORT'] = 3307
+app.config['MYSQL_HOST'] = 'hopper.proxy.rlwy.net'
 app.config['MYSQL_USER'] = 'root'
-app.config['MYSQL_PASSWORD'] = ''
-app.config['MYSQL_DB'] = 'grievance_db'
+app.config['MYSQL_PASSWORD'] = 'MTpuaHIYvQcOxfJPPSPWxUUORUTUNpcB'
+app.config['MYSQL_DB'] = 'railway'
+app.config['MYSQL_PORT'] = 22927
 
 mysql = MySQL(app)
 
