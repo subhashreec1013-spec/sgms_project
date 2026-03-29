@@ -16,98 +16,13 @@ app.config['MYSQL_PORT'] = 22927
 
 mysql = MySQL(app)
 
-@app.route('/setup_db')
-def setup_db():
-    cur = mysql.connection.cursor()
-
-    cur.execute("""
-    CREATE TABLE IF NOT EXISTS admin (
-        admin_id INT AUTO_INCREMENT PRIMARY KEY,
-        name VARCHAR(100),
-        username VARCHAR(50),
-        password VARCHAR(255),
-        dept_id INT,
-        level INT
-    )
-    """)
-
-    cur.execute("""
-    CREATE TABLE IF NOT EXISTS department (
-        dept_id INT AUTO_INCREMENT PRIMARY KEY,
-        dept_name VARCHAR(100)
-    )
-    """)
-
-    cur.execute("""
-    INSERT INTO department (dept_name) VALUES
-    ('Academic'), ('Finance'), ('Infrastructure'), ('Faculty'),
-    ('Hostel'), ('Examination'), ('Transport'),
-    ('Library'), ('Placement'), ('Others')
-    """)
-
-    cur.execute("""
-    CREATE TABLE IF NOT EXISTS student (
-        student_id VARCHAR(20) PRIMARY KEY,
-        name VARCHAR(100),
-        email VARCHAR(100),
-        password VARCHAR(255),
-        course VARCHAR(100),
-        year INT
-    )
-    """)
-
-    cur.execute("""
-    CREATE TABLE IF NOT EXISTS grievance (
-        grievance_id INT AUTO_INCREMENT PRIMARY KEY,
-        description TEXT,
-        category VARCHAR(100),
-        priority_score INT,
-        status VARCHAR(50),
-        severity_level VARCHAR(50),
-        created_date DATE,
-        student_id VARCHAR(20),
-        dept_id INT,
-        current_level INT DEFAULT 1
-    )
-    """)
-
-    cur.execute("""
-    CREATE TABLE IF NOT EXISTS grievance_log (
-        log_id INT AUTO_INCREMENT PRIMARY KEY,
-        grievance_id INT,
-        action_by INT,
-        status VARCHAR(50),
-        remarks TEXT,
-        updated_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-    )
-    """)
-
-    mysql.connection.commit()
-    cur.close()
-
-    return "DB Setup Done ✅"
-
-from werkzeug.security import generate_password_hash
-
-@app.route('/fix_admin_passwords')
-def fix_admin_passwords():
-    cur = mysql.connection.cursor()
-
-    new_password = generate_password_hash("admin123")
-
-    cur.execute("UPDATE admin SET password = %s", (new_password,))
-
-    mysql.connection.commit()
-    cur.close()
-
-    return "All admin passwords fixed ✅"
 
 # ==========================
 # HOME
 # ==========================
 @app.route('/')
 def home():
-    return redirect(url_for('login'))
+    return render_template('home.html')
 
 # ==========================
 # STUDENT REGISTER

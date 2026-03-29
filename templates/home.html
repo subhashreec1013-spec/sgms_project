@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Grievance System</title>
+
+    <!-- Bootstrap -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <style>
+        body {
+            background: url("{{ url_for('static', filename='images/bg.jpg') }}") no-repeat center center fixed;
+            background-size: cover;
+            margin: 0;
+        }
+
+        .overlay {
+            background-color: rgba(255, 255, 255, 0.3);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .home-card {
+            padding: 40px;
+            border-radius: 15px;
+            text-align: center;
+        }
+
+        .logo {
+            width: 100px;
+            display: block;
+            margin: auto;
+        }
+
+        .btn-custom {
+            width: 200px;
+            margin: 10px;
+            font-size: 18px;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="overlay">
+    <div class="card shadow home-card">
+
+        <!-- SRM Logo -->
+        <img src="{{ url_for('static', filename='images/logo.png') }}" class="logo mb-3">
+
+        <h3 class="mb-4">Student Grievance Management System</h3>
+
+        <!-- Buttons -->
+        <a href="/login" class="btn btn-primary btn-custom">Student Login</a>
+        <br>
+        <a href="/admin_login" class="btn btn-dark btn-custom">Admin Login</a>
+
+    </div>
+</div>
+
+</body>
+</html>
