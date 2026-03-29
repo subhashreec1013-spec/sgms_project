@@ -9,6 +9,7 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <style>
+
 body{
 background:#f4f6f9;
 font-family:'Segoe UI',sans-serif;
@@ -30,6 +31,16 @@ overflow:hidden;
 .btn{
 border-radius:8px;
 }
+
+/* ===== CHART SIZE FIX ===== */
+.chart-box{
+height:250px;
+}
+
+canvas{
+max-height:250px !important;
+}
+
 </style>
 </head>
 
@@ -74,7 +85,7 @@ border-radius:8px;
 
 <h3 class="mb-4">Admin Dashboard</h3>
 
-<!-- CARDS -->
+<!-- ===== CARDS ===== -->
 <div class="row g-3 text-center mb-4">
 
 <div class="col">
@@ -114,34 +125,33 @@ border-radius:8px;
 
 </div>
 
-<!-- ================= CHARTS SECTION ================= -->
-
+<!-- ===== CHARTS ===== -->
 <div class="row mb-4">
 
 <div class="col-md-6">
-<div class="card p-3 shadow">
-<h5>Bar Chart</h5>
+<div class="card p-3 shadow chart-box">
+<h6 class="text-center">Bar Chart</h6>
 <canvas id="barChart"></canvas>
 </div>
 </div>
 
 <div class="col-md-6">
-<div class="card p-3 shadow">
-<h5>Pie Chart</h5>
+<div class="card p-3 shadow chart-box">
+<h6 class="text-center">Pie Chart</h6>
 <canvas id="pieChart"></canvas>
 </div>
 </div>
 
 </div>
 
-<!-- ================= SUPER ADMIN ================= -->
+<!-- ===== PDF BUTTON ===== -->
 {% if session.get('admin_level') == 4 %}
 <a href="/export_pdf" class="btn btn-dark mb-3">
 Export PDF Report
 </a>
 {% endif %}
 
-<!-- TABLE -->
+<!-- ===== TABLE ===== -->
 <div class="card shadow p-4">
 
 <h5 class="mb-3">Department Grievances</h5>
@@ -204,7 +214,9 @@ Export PDF Report
 <td style="max-width:250px;">{{ g[7] }}</td>
 
 <td>
-<a href="/view_history/{{ g[0] }}" class="btn btn-sm btn-info">History</a>
+<a href="/view_history/{{ g[0] }}" class="btn btn-sm btn-info">
+History
+</a>
 </td>
 
 </tr>
@@ -224,8 +236,7 @@ Export PDF Report
 
 </div>
 
-<!-- ================= CHART SCRIPT ================= -->
-
+<!-- ===== CHART SCRIPT ===== -->
 <script>
 
 const dataValues = [
@@ -237,6 +248,13 @@ const dataValues = [
 
 const labels = ['Pending','In Progress','Resolved','Rejected'];
 
+const colors = [
+    '#6c757d',  // gray
+    '#0d6efd',  // blue
+    '#198754',  // green
+    '#dc3545'   // red
+];
+
 /* BAR CHART */
 new Chart(document.getElementById('barChart'), {
     type: 'bar',
@@ -244,8 +262,13 @@ new Chart(document.getElementById('barChart'), {
         labels: labels,
         datasets: [{
             label: 'Grievances',
-            data: dataValues
+            data: dataValues,
+            backgroundColor: colors
         }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false
     }
 });
 
@@ -255,8 +278,13 @@ new Chart(document.getElementById('pieChart'), {
     data: {
         labels: labels,
         datasets: [{
-            data: dataValues
+            data: dataValues,
+            backgroundColor: colors
         }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false
     }
 });
 
