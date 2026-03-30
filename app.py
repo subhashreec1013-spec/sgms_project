@@ -106,11 +106,16 @@ def admin_login():
 
         if check_password_hash(admin[2], password):
             session.clear()
+
             session['admin_id'] = admin[0]
             session['admin_name'] = admin[1]
-            session['admin_level'] = admin[5]
-            session['dept_id'] = admin[4]
+            session['admin_dept'] = admin[3]
+            session['admin_level'] = admin[4]
+
+            print("LOGIN DEBUG:", admin[1], "Dept:", admin[3], "Level:", admin[4])
+
             return redirect(url_for('admin_dashboard'))
+
         else:
             return "<h4 style='color:red;'>Invalid Password ❌</h4>"
 
@@ -128,11 +133,8 @@ def admin_dashboard():
     admin_dept = session['admin_dept']
 
     cur = mysql.connection.cursor()
-    
-    # ==========================
-    # AUTO ESCALATION (2 DAYS RULE)
-    # ==========================
 
+    # ================= AUTO ESCALATION =================
     cur.execute("""
         SELECT grievance_id, current_level
         FROM grievance
@@ -146,25 +148,22 @@ def admin_dashboard():
         gid = g[0]
         level = g[1]
 
-        # Only escalate if not at highest level (3)
         if level < 3:
+            cur.execute("""
+                UPDATE grievance
+                SET current_level = current_level + 1,
+                    status = 'Auto Escalated'
+                WHERE grievance_id = %s
+            """, (gid,))
 
-           # Update grievance
-           cur.execute("""
-               UPDATE grievance
-               SET current_level = current_level + 1,
-                   status = 'Auto Escalated'
-               WHERE grievance_id = %s
-           """, (gid,))
+            cur.execute("""
+                INSERT INTO grievance_log
+                (grievance_id, action_by, status, remarks)
+                VALUES (%s, %s, %s, %s)
+            """, (gid, None,
+                  'Auto Escalated',
+                  'System auto-escalated after 2 days delay'))
 
-            # Insert into grievance_log
-           cur.execute("""
-               INSERT INTO grievance_log
-               (grievance_id, action_by, status, remarks)
-               VALUES (%s, %s, %s, %s)
-           """, (gid, None,
-                 'Auto Escalated',
-                 'System auto-escalated after 2 days delay'))
     mysql.connection.commit()
 
     # ================= SUPER ADMIN =================
@@ -188,116 +187,90 @@ def admin_dashboard():
 
         cur.execute("SELECT COUNT(*) FROM grievance WHERE status='Resolved'")
         resolved = cur.fetchone()[0]
-      
-        cur.execute("""
-        SELECT COUNT(*) 
-        FROM grievance 
-        WHERE status = 'Rejected'
-        """)
-        rejected = cur.fetchone()[0] or 0
+
+        cur.execute("SELECT COUNT(*) FROM grievance WHERE status='Rejected'")
+        rejected = cur.fetchone()[0]
 
     # ================= DEAN =================
-    elif admin_level == 3:
+    elif session.get('admin_name') == 'Dean':
 
         cur.execute("""
             SELECT grievance_id, student_id, category, severity_level,
                    priority_score, status, created_date, description
             FROM grievance
             WHERE current_level = 3
-              AND dept_id IN (1,4,6)
             ORDER BY grievance_id DESC
         """)
         grievances = cur.fetchall()
 
-        cur.execute("""
-            SELECT COUNT(*) FROM grievance
-            WHERE current_level = 3
-              AND dept_id IN (1,4,6)
-        """)
+        cur.execute("SELECT COUNT(*) FROM grievance WHERE current_level = 3")
         total = cur.fetchone()[0]
 
         cur.execute("""
             SELECT COUNT(*) FROM grievance
-            WHERE current_level = 3
-              AND status='Pending'
-              AND dept_id IN (1,4,6)
+            WHERE current_level = 3 AND status='Pending'
         """)
         pending = cur.fetchone()[0]
 
         cur.execute("""
             SELECT COUNT(*) FROM grievance
-            WHERE current_level = 3
-              AND status='In Progress'
-              AND dept_id IN (1,4,6)
+            WHERE current_level = 3 AND status='In Progress'
         """)
         in_progress = cur.fetchone()[0]
 
         cur.execute("""
             SELECT COUNT(*) FROM grievance
-            WHERE current_level = 3
-              AND status='Resolved'
-              AND dept_id IN (1,4,6)
+            WHERE current_level = 3 AND status='Resolved'
         """)
         resolved = cur.fetchone()[0]
 
         cur.execute("""
             SELECT COUNT(*) FROM grievance
-            WHERE current_level = 3
-              AND status='Rejected'
-              AND dept_id IN (1,4,6)
+            WHERE current_level = 3 AND status='Rejected'
         """)
         rejected = cur.fetchone()[0]
 
-    # ================= MENTOR / HOD / OTHER ADMIN =================
+    # ================= OTHER ADMINS =================
     else:
 
+        # 🔥 FIXED: removed current_level filter
         cur.execute("""
             SELECT grievance_id, student_id, category, severity_level,
                    priority_score, status, created_date, description
             FROM grievance
             WHERE dept_id = %s
-              AND current_level = %s
             ORDER BY grievance_id DESC
-        """, (admin_dept, admin_level))
+        """, (admin_dept,))
         grievances = cur.fetchall()
 
         cur.execute("""
             SELECT COUNT(*) FROM grievance
             WHERE dept_id = %s
-              AND current_level = %s
-        """, (admin_dept, admin_level))
+        """, (admin_dept,))
         total = cur.fetchone()[0]
 
         cur.execute("""
             SELECT COUNT(*) FROM grievance
-            WHERE dept_id = %s
-              AND current_level = %s
-              AND status='Pending'
-        """, (admin_dept, admin_level))
+            WHERE dept_id = %s AND status='Pending'
+        """, (admin_dept,))
         pending = cur.fetchone()[0]
 
         cur.execute("""
             SELECT COUNT(*) FROM grievance
-            WHERE dept_id = %s
-              AND current_level = %s
-              AND status='In Progress'
-        """, (admin_dept, admin_level))
+            WHERE dept_id = %s AND status='In Progress'
+        """, (admin_dept,))
         in_progress = cur.fetchone()[0]
 
         cur.execute("""
             SELECT COUNT(*) FROM grievance
-            WHERE dept_id = %s
-              AND current_level = %s
-              AND status='Resolved'
-        """, (admin_dept, admin_level))
+            WHERE dept_id = %s AND status='Resolved'
+        """, (admin_dept,))
         resolved = cur.fetchone()[0]
 
         cur.execute("""
             SELECT COUNT(*) FROM grievance
-            WHERE dept_id = %s
-              AND current_level = %s
-              AND status='Rejected'
-        """, (admin_dept, admin_level))
+            WHERE dept_id = %s AND status='Rejected'
+        """, (admin_dept,))
         rejected = cur.fetchone()[0]
 
     cur.close()
