@@ -1,133 +1,188 @@
-<!DOCTYPE html>  <html>  
-<head>  
-    <title>Admin Dashboard</title>  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Admin Dashboard</title>
 
-<style>  
-body{  
-background:#f4f6f9;  
-font-family:'Segoe UI',sans-serif;  
-}  
-  
-.navbar{  
-box-shadow:0 2px 8px rgba(0,0,0,0.1);  
-}  
-  
-.card{  
-border-radius:12px;  
-}  
-  
-.table{  
-border-radius:10px;  
-overflow:hidden;  
-}  
-  
-.btn{  
-border-radius:8px;  
-}  
-</style>  </head>  <body>  <!-- ================= NAVBAR ================= -->  <nav class="navbar navbar-expand-lg navbar-dark bg-dark">  
-  <div class="container-fluid">  
-    <a class="navbar-brand" href="#">SGMS</a>  <div class="collapse navbar-collapse">  
-  <ul class="navbar-nav me-auto">  
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
 
-    <li class="nav-item">  
-        <a class="nav-link {% if request.path == '/admin_dashboard' %}active fw-bold{% endif %}"   
-           href="/admin_dashboard">  
-           Dashboard  
-        </a>  
-    </li>  
+<style>
+body{
+background:#f4f6f9;
+font-family:'Segoe UI',sans-serif;
+}
 
-    {% if session.get('admin_level') == 4 %}  
-    <li class="nav-item">  
-        <a class="nav-link {% if request.path == '/admin_performance' %}active fw-bold{% endif %}"   
-           href="/admin_performance">  
-           Performance  
-        </a>  
-    </li>  
-    {% endif %}  
+.navbar{
+box-shadow:0 2px 8px rgba(0,0,0,0.1);
+}
 
-  </ul>  
+.card{
+border-radius:12px;
+}
 
-  <span class="navbar-text text-white me-3">  
-      Welcome, {{ name }}  
-  </span>  
+.table{
+border-radius:10px;
+overflow:hidden;
+}
 
-  <a href="/logout" class="btn btn-sm btn-danger">Logout</a>  
+.btn{
+border-radius:8px;
+}
+</style>
+</head>
+
+<body>
+
+<!-- ================= NAVBAR ================= -->
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+  <div class="container-fluid">
+    <a class="navbar-brand" href="#">SGMS</a>
+
+    <div class="collapse navbar-collapse">
+      <ul class="navbar-nav me-auto">
+
+        <li class="nav-item">
+            <a class="nav-link {% if request.path == '/admin_dashboard' %}active fw-bold{% endif %}" 
+               href="/admin_dashboard">
+               Dashboard
+            </a>
+        </li>
+
+        {% if session.get('admin_level') == 4 %}
+        <li class="nav-item">
+            <a class="nav-link {% if request.path == '/admin_performance' %}active fw-bold{% endif %}" 
+               href="/admin_performance">
+               Performance
+            </a>
+        </li>
+        {% endif %}
+
+      </ul>
+
+      <span class="navbar-text text-white me-3">
+          Welcome, {{ name }}
+      </span>
+
+      <a href="/logout" class="btn btn-sm btn-danger">Logout</a>
+    </div>
+  </div>
+</nav>
+
+<div class="container mt-4">
+
+<h3 class="mb-4">Admin Dashboard</h3>
+
+<!-- ================= DASHBOARD CARDS ================= -->
+<div class="row g-3 text-center mb-4">
+
+<div class="col">
+<div class="card text-white bg-dark shadow p-3">
+<h6>Total</h6>
+<h3>{{ total | default(0) }}</h3>
+</div>
 </div>
 
-  </div>  
-</nav>  <div class="container mt-4">  <h3 class="mb-4">Admin Dashboard</h3>  <!-- ================= DASHBOARD CARDS ================= -->  <div class="row g-3 text-center mb-4">  <div class="col">  
-<div class="card text-white bg-dark shadow p-3">  
-<h6>Total</h6>  
-<h3>{{ total | default(0) }}</h3>  
-</div>  
-</div>  <div class="col">  
-<div class="card text-white bg-secondary shadow p-3">  
-<h6>Pending</h6>  
-<h3>{{ pending | default(0) }}</h3>  
-</div>  
-</div>  <div class="col">  
-<div class="card text-white bg-primary shadow p-3">  
-<h6>In Progress</h6>  
-<h3>{{ in_progress | default(0) }}</h3>  
-</div>  
-</div>  <div class="col">  
-<div class="card text-white bg-success shadow p-3">  
-<h6>Resolved</h6>  
-<h3>{{ resolved | default(0) }}</h3>  
-</div>  
-</div>  <div class="col">  
-<div class="card text-white bg-danger shadow p-3">  
-<h6>Rejected</h6>  
-<h3>{{ rejected | default(0) }}</h3>  
-</div>  
-</div>  </div>  <!-- ================= SUPER ADMIN PDF ================= -->  {% if session.get('admin_level') == 4 %}
+<div class="col">
+<div class="card text-white bg-secondary shadow p-3">
+<h6>Pending</h6>
+<h3>{{ pending | default(0) }}</h3>
+</div>
+</div>
+
+<div class="col">
+<div class="card text-white bg-primary shadow p-3">
+<h6>In Progress</h6>
+<h3>{{ in_progress | default(0) }}</h3>
+</div>
+</div>
+
+<div class="col">
+<div class="card text-white bg-success shadow p-3">
+<h6>Resolved</h6>
+<h3>{{ resolved | default(0) }}</h3>
+</div>
+</div>
+
+<div class="col">
+<div class="card text-white bg-danger shadow p-3">
+<h6>Rejected</h6>
+<h3>{{ rejected | default(0) }}</h3>
+</div>
+</div>
+
+</div>
+
+<!-- ================= SUPER ADMIN PDF ================= -->
+{% if session.get('admin_level') == 4 %}
 <a href="/export_pdf" class="btn btn-dark mb-3">
 Export PDF Report
 </a>
 {% endif %}
 
-<!-- ================= TABLE ================= -->  <div class="card shadow p-4">  <h5 class="mb-3">Department Grievances</h5>  {% if grievances and grievances|length > 0 %}
+<!-- ================= TABLE ================= -->
+<div class="card shadow p-4">
 
-<div class="table-responsive">  <table class="table table-bordered table-striped">  <thead class="table-dark">  
-<tr>  
-<th>ID</th>  
-<th>Student</th>  
-<th>Category</th>  
-<th>Severity</th>  
-<th>Priority</th>  
-<th>Status</th>  
-<th>Date</th>  
-<th>Description</th>  
-<th>Action</th>  
-</tr>  
-</thead>  <tbody>  {% for g in grievances %}
+<h5 class="mb-3">Department Grievances</h5>
 
-<tr>  <td>{{ g[0] }}</td>  
-<td>{{ g[1] }}</td>  
-<td>{{ g[2] }}</td>  
-<td>{{ g[3] }}</td>  <td>  
-{% if g[4] == 3 %}  
-<span class="badge bg-danger">High</span>  
-{% elif g[4] == 2 %}  
-<span class="badge bg-warning text-dark">Medium</span>  
-{% else %}  
-<span class="badge bg-success">Low</span>  
-{% endif %}  
-</td>  <td>  
-{% set status = g[5]|lower %}  
-{% if status == "pending" %}  
-<span class="badge bg-secondary">Pending</span>  
-{% elif status == "in progress" %}  
-<span class="badge bg-primary">In Progress</span>  
-{% elif status == "resolved" %}  
-<span class="badge bg-success">Resolved</span>  
-{% elif status == "rejected" %}  
-<span class="badge bg-danger">Rejected</span>  
-{% else %}  
-<span class="badge bg-dark">{{ g[5] }}</span>  
-{% endif %}  
-</td>  <td>{{ g[6] }}</td>  
-<td style="max-width:250px;">{{ g[7] }}</td>  <td>  {% if session.get('admin_level') == 4 %}
+{% if grievances and grievances|length > 0 %}
+<div class="table-responsive">
+
+<table class="table table-bordered table-striped">
+
+<thead class="table-dark">
+<tr>
+<th>ID</th>
+<th>Student</th>
+<th>Category</th>
+<th>Severity</th>
+<th>Priority</th>
+<th>Status</th>
+<th>Date</th>
+<th>Description</th>
+<th>Action</th>
+</tr>
+</thead>
+
+<tbody>
+
+{% for g in grievances %}
+<tr>
+
+<td>{{ g[0] }}</td>
+<td>{{ g[1] }}</td>
+<td>{{ g[2] }}</td>
+<td>{{ g[3] }}</td>
+
+<td>
+{% if g[4] == 3 %}
+<span class="badge bg-danger">High</span>
+{% elif g[4] == 2 %}
+<span class="badge bg-warning text-dark">Medium</span>
+{% else %}
+<span class="badge bg-success">Low</span>
+{% endif %}
+</td>
+
+<td>
+{% set status = g[5]|lower %}
+{% if status == "pending" %}
+<span class="badge bg-secondary">Pending</span>
+{% elif status == "in progress" %}
+<span class="badge bg-primary">In Progress</span>
+{% elif status == "resolved" %}
+<span class="badge bg-success">Resolved</span>
+{% elif status == "rejected" %}
+<span class="badge bg-danger">Rejected</span>
+{% else %}
+<span class="badge bg-dark">{{ g[5] }}</span>
+{% endif %}
+</td>
+
+<td>{{ g[6] }}</td>
+<td style="max-width:250px;">{{ g[7] }}</td>
+
+<td>
+
+{% if session.get('admin_level') == 4 %}
 
 <span class="text-muted">Monitoring</span>
 <a href="/view_history/{{ g[0] }}" class="btn btn-sm btn-info mt-1 w-100">History</a>
@@ -139,23 +194,48 @@ Export PDF Report
 
 {% else %}
 
-<form method="POST" action="/resolve/{{ g[0] }}">  <select name="action" class="form-select form-select-sm mb-1" required>  
-<option value="">Select Action</option>  
-<option value="Resolved">Resolve</option>  
-<option value="Rejected">Reject</option>  
-</select>  <input type="text" name="remarks"  
-class="form-control form-control-sm mb-1"  
+<form method="POST" action="/resolve/{{ g[0] }}">
+
+<select name="action" class="form-select form-select-sm mb-1" required>
+<option value="">Select Action</option>
+<option value="Resolved">Resolve</option>
+<option value="Rejected">Reject</option>
+</select>
+
+<input type="text" name="remarks"
+class="form-control form-control-sm mb-1"
 placeholder="Enter remarks" required>
 
-<button type="submit" class="btn btn-sm btn-success w-100">  
-Submit  
-</button>  </form>  <a href="/view_history/{{ g[0] }}" class="btn btn-sm btn-info mt-1 w-100">History</a>
+<button type="submit" class="btn btn-sm btn-success w-100">
+Submit
+</button>
+
+</form>
+
+<a href="/view_history/{{ g[0] }}" class="btn btn-sm btn-info mt-1 w-100">History</a>
 
 {% endif %}
 
-</td>  </tr>  
-{% endfor %}  </tbody>  </table>  </div>  {% else %}
+</td>
 
-<p class="text-muted">No grievances available.</p>  
-{% endif %}  </div>  </div>  </body>  
+</tr>
+{% endfor %}
+
+</tbody>
+
+</table>
+
+</div>
+
+{% else %}
+<p class="text-muted">No grievances available.</p>
+{% endif %}
+
+</div>
+
+</div>
+
+</body>
 </html>
+
+
