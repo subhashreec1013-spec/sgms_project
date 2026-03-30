@@ -2,130 +2,120 @@
 <html>
 <head>
     <title>Admin Performance</title>
-
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
-
 <style>
 
-/* ===== BACKGROUND ===== */
 body{
-    background: url("{{ url_for('static', filename='images/bg.jpg') }}") no-repeat center center fixed;
-    background-size: cover;
-    font-family:'Segoe UI',sans-serif;
+background:#f4f6f9;
+font-family:'Segoe UI',sans-serif;
 }
 
-/* ===== OVERLAY ===== */
-.overlay{
-    background: rgba(0,0,0,0.4);
-    min-height:100vh;
-    padding:20px;
-}
-
-/* ===== NAVBAR ===== */
 .navbar{
-    background: linear-gradient(135deg,#1f1f1f,#343a40);
-    box-shadow:0 4px 12px rgba(0,0,0,0.3);
+box-shadow:0 2px 8px rgba(0,0,0,0.1);
 }
 
-/* ===== GLASS CARD ===== */
 .card{
-    border-radius:15px;
-    backdrop-filter: blur(12px);
-    background: rgba(255,255,255,0.2);
-    border:none;
-    color:white;
+border-radius:12px;
 }
 
-/* ===== TABLE ===== */
 .table{
-    background: rgba(255,255,255,0.9);
-    border-radius:10px;
-    overflow:hidden;
+border-radius:10px;
+overflow:hidden;
 }
 
-/* ===== BUTTON ===== */
 .btn{
-    border-radius:10px;
+border-radius:8px;
+}
+
+.dashboard-title{
+font-weight:600;
+margin-bottom:20px;
+}
+
+.chart-box{
+height:280px;
 }
 
 </style>
-
 </head>
-
 <body>
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+  <div class="container-fluid">
+    <a class="navbar-brand" href="#">SGMS</a>
 
-<div class="overlay">
+    <div class="collapse navbar-collapse">
+      <ul class="navbar-nav me-auto mb-2 mb-lg-0">
 
-<!-- ================= NAVBAR ================= -->
-<nav class="navbar navbar-expand-lg navbar-dark px-3 mb-4 rounded">
+        {% if session.get('student_id') %}
+            <li class="nav-item">
+                <a class="nav-link" href="/dashboard">Dashboard</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="/raise_grievance">Raise Grievance</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="/my_grievances">My Grievances</a>
+            </li>
+        {% endif %}
 
-    <a class="navbar-brand fw-bold" href="#">SGMS</a>
+        {% if session.get('admin_id') %}
+            <li class="nav-item">
+                <a class="nav-link" href="/admin_dashboard">Dashboard</a>
+            </li>
 
-    <div class="ms-auto d-flex align-items-center">
+            {% if session.get('admin_level') == 4 %}
+            <li class="nav-item">
+                <a class="nav-link {% if request.path == '/admin_performance' %}active fw-bold{% endif %}" href="/admin_performance">
+                   Performance
+                </a>
+            </li>
+            {% endif %}
+        {% endif %}
 
-        <span class="text-white me-3">
-            👋 {{ name }}
-        </span>
+      </ul>
 
-        <a href="/logout" class="btn btn-danger btn-sm">
-            <i class="bi bi-box-arrow-right"></i> Logout
-        </a>
+      <span class="navbar-text text-white me-3">
+          Welcome, {{ name }}
+      </span>
 
+      <a href="/logout" class="btn btn-sm btn-danger">Logout</a>
     </div>
-
+  </div>
 </nav>
+<div class="container mt-5">
 
-<!-- ================= CONTENT ================= -->
-<div class="container">
+    <h3 class="mb-4">Admin Performance Monitoring</h3>
 
-<div class="card shadow p-4">
+    <table class="table table-bordered table-striped">
+        <thead class="table-dark">
+            <tr>
+                <th>Admin Name</th>
+                <th>Department</th>
+                <th>Total Actions</th>
+                <th>Resolved</th>
+                <th>Rejected</th>
+                <th>Escalated</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for p in performance %}
+            <tr>
+                <td>{{ p[0] }}</td>
+                <td>{{ p[1] }}</td>
+                <td>{{ p[2] }}</td>
+                <td>{{ p[3] }}</td>
+                <td>{{ p[4] }}</td>
+                <td>{{ p[5] }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
 
-<h4 class="mb-4 fw-bold">📊 Admin Performance Monitoring</h4>
-
-<div class="table-responsive">
-
-<table class="table table-bordered table-hover">
-
-<thead class="table-dark">
-<tr>
-<th>Admin</th>
-<th>Department</th>
-<th>Total</th>
-<th>Resolved</th>
-<th>Rejected</th>
-<th>Escalated</th>
-</tr>
-</thead>
-
-<tbody>
-{% for p in performance %}
-<tr>
-<td>{{ p[0] }}</td>
-<td>{{ p[1] }}</td>
-<td>{{ p[2] }}</td>
-<td><span class="badge bg-success">{{ p[3] }}</span></td>
-<td><span class="badge bg-danger">{{ p[4] }}</span></td>
-<td><span class="badge bg-warning text-dark">{{ p[5] }}</span></td>
-</tr>
-{% endfor %}
-</tbody>
-
-</table>
-
-</div>
-
-<div class="text-end mt-3">
-<a href="/admin_dashboard" class="btn btn-secondary">
-    <i class="bi bi-arrow-left"></i> Back to Dashboard
-</a>
-</div>
-
-</div>
-
-</div>
+    <a href="/admin_dashboard" class="btn btn-secondary">Back</a>
 
 </div>
 
 </body>
 </html>
+
+
