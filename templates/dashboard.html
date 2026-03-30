@@ -4,60 +4,29 @@
     <title>Student Dashboard</title>
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
 
 <style>
 
-/* ===== BACKGROUND ===== */
 body{
-    background: url("{{ url_for('static', filename='images/bg.jpg') }}") no-repeat center center fixed;
-    background-size: cover;
-    font-family:'Segoe UI',sans-serif;
+background:#f4f6f9;
+font-family:'Segoe UI',sans-serif;
 }
 
-/* ===== OVERLAY ===== */
-.overlay{
-    background: rgba(0,0,0,0.4);
-    min-height:100vh;
-    padding:20px;
-}
-
-/* ===== NAVBAR ===== */
 .navbar{
-    background: linear-gradient(135deg,#1f1f1f,#343a40);
-    box-shadow:0 4px 12px rgba(0,0,0,0.3);
+box-shadow:0 2px 8px rgba(0,0,0,0.1);
 }
 
-/* ===== GLASS CARD ===== */
 .card{
-    border-radius:15px;
-    backdrop-filter: blur(12px);
-    background: rgba(255,255,255,0.2);
-    border:none;
-    color:white;
+border-radius:12px;
 }
 
-/* ===== TABLE ===== */
-.table{
-    background: rgba(255,255,255,0.9);
-    border-radius:10px;
-    overflow:hidden;
+.btn{
+border-radius:8px;
 }
 
-/* ===== BUTTONS ===== */
-.btn-primary{
-    background: linear-gradient(45deg,#00c6ff,#0072ff);
-    border:none;
-}
-
-.btn-dark{
-    background: linear-gradient(45deg,#434343,#000);
-    border:none;
-}
-
-.btn:hover{
-    transform:scale(1.05);
-    transition:0.3s;
+.dashboard-title{
+font-weight:600;
+margin-bottom:20px;
 }
 
 </style>
@@ -66,38 +35,61 @@ body{
 
 <body>
 
-<div class="overlay">
-
 <!-- ================= NAVBAR ================= -->
-<nav class="navbar navbar-expand-lg navbar-dark px-3 mb-4 rounded">
 
-    <a class="navbar-brand fw-bold" href="#">SGMS</a>
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+  <div class="container-fluid">
+    <a class="navbar-brand" href="#">SGMS</a>
 
-    <div class="ms-auto d-flex align-items-center">
+    <div class="collapse navbar-collapse">
 
-        <span class="text-white me-3">
-            👋 {{ name }}
-        </span>
+      <ul class="navbar-nav me-auto">
 
-        <a href="/logout" class="btn btn-danger btn-sm">
-            <i class="bi bi-box-arrow-right"></i> Logout
-        </a>
+        <li class="nav-item">
+            <a class="nav-link {% if request.path == '/dashboard' %}active fw-bold{% endif %}" href="/dashboard">
+                Dashboard
+            </a>
+        </li>
+
+        <li class="nav-item">
+            <a class="nav-link" href="/raise_grievance">
+                Grievance Addressal
+            </a>
+        </li>
+
+        <li class="nav-item">
+            <a class="nav-link" href="/my_grievances">
+                My Grievances
+            </a>
+        </li>
+
+      </ul>
+
+      <span class="navbar-text text-white me-3">
+          Welcome {{ name }}
+      </span>
+
+      <a href="/logout" class="btn btn-sm btn-danger">
+          Logout
+      </a>
 
     </div>
-
+  </div>
 </nav>
 
 <!-- ================= DASHBOARD ================= -->
 
-<div class="container">
+<div class="container mt-5">
 
 <div class="card shadow p-4">
 
-<h4 class="mb-4 fw-bold">👨‍🎓 Student Dashboard</h4>
+<div class="card-header bg-danger text-white">
+<h4 class="mb-0">Student Dashboard</h4>
+</div>
 
-<!-- ===== STUDENT INFO ===== -->
+<hr>
 
-<h5 class="mb-3">Profile Details</h5>
+<h5 class="mb-3">Student Information</h5>
 
 <table class="table table-bordered">
 
@@ -125,22 +117,18 @@ body{
 
 <hr>
 
-<!-- ===== ACTION BUTTONS ===== -->
-
 <div class="row g-3">
 
 <div class="col-md-6">
 <a href="/raise_grievance" class="btn btn-primary w-100">
-    <i class="bi bi-pencil-square"></i> File New Grievance
+File New Grievance
 </a>
 </div>
 
 <div class="col-md-6">
 <a href="/my_grievances" class="btn btn-dark w-100">
-    <i class="bi bi-folder2-open"></i> View My Grievances
+View My Grievances
 </a>
-</div>
-
 </div>
 
 </div>
