@@ -108,8 +108,8 @@ def admin_login():
             session.clear()
             session['admin_id'] = admin[0]
             session['admin_name'] = admin[1]
-            session['admin_dept'] = admin[3]
-            session['admin_level'] = admin[4]
+            session['admin_level'] = admin[5]
+            session['dept_id'] = admin[4]
             return redirect(url_for('admin_dashboard'))
         else:
             return "<h4 style='color:red;'>Invalid Password ❌</h4>"
@@ -128,7 +128,7 @@ def admin_dashboard():
     admin_dept = session['admin_dept']
 
     cur = mysql.connection.cursor()
-
+    
     # ==========================
     # AUTO ESCALATION (2 DAYS RULE)
     # ==========================
