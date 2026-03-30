@@ -214,9 +214,47 @@ Export PDF Report
 <td style="max-width:250px;">{{ g[7] }}</td>
 
 <td>
-<a href="/view_history/{{ g[0] }}" class="btn btn-sm btn-info">
-History
-</a>
+
+{% set status = g[5]|lower %}
+
+{% if session.get('admin_level') == 4 %}
+
+    <!-- SUPER ADMIN (VIEW ONLY) -->
+    <span class="text-muted">Monitoring</span>
+    <a href="/view_history/{{ g[0] }}" class="btn btn-sm btn-info mt-1 w-100">History</a>
+
+{% elif status in ["resolved", "rejected"] %}
+
+    <!-- COMPLETED -->
+    <span class="text-success fw-bold">✔ Completed</span>
+    <a href="/view_history/{{ g[0] }}" class="btn btn-sm btn-info mt-1 w-100">History</a>
+
+{% else %}
+
+    <!-- ACTION FORM FOR OTHER ADMINS -->
+    <form method="POST" action="/resolve/{{ g[0] }}">
+
+        <select name="action" class="form-select form-select-sm mb-1" required>
+            <option value="">Select Action</option>
+            <option value="Resolved">Resolve</option>
+            <option value="Rejected">Reject</option>
+            <option value="Escalated">Escalate</option>
+        </select>
+
+        <input type="text" name="remarks"
+        class="form-control form-control-sm mb-1"
+        placeholder="Enter remarks" required>
+
+        <button type="submit" class="btn btn-sm btn-success w-100">
+            Submit
+        </button>
+
+    </form>
+
+    <a href="/view_history/{{ g[0] }}" class="btn btn-sm btn-info mt-1 w-100">History</a>
+
+{% endif %}
+
 </td>
 
 </tr>
