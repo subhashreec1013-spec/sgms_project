@@ -110,7 +110,10 @@ def admin_login():
         print("ENTERED:", password)
         print("DB HASH:", admin[2])
         print("CHECK:", check_password_hash(admin[2], password))
-
+        
+        print("DB HOST:", app.config['MYSQL_HOST'])
+        print("DB NAME:", app.config['MYSQL_DB'])
+        print("ADMIN ROW:", admin)
         # ✅ Password check
         if check_password_hash(admin[2], password):
             session.clear()
