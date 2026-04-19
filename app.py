@@ -8,11 +8,11 @@ app.secret_key = "supersecretkey"
 # ==========================
 # DATABASE CONFIG
 # ==========================
-app.config['MYSQL_HOST'] = 'mysql.railway.internal'
+app.config['MYSQL_HOST'] = 'roundhouse.proxy.rlwy.net'
 app.config['MYSQL_USER'] = 'root'
 app.config['MYSQL_PASSWORD'] = 'RPxWbUgnYIoaozUiwIwSSgasXFFaXPxx'
 app.config['MYSQL_DB'] = 'railway'
-app.config['MYSQL_PORT'] = 3306
+app.config['MYSQL_PORT'] = 17072
 
 mysql = MySQL(app)
 
