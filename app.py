@@ -86,11 +86,12 @@ def login():
 # ==========================
 # ADMIN LOGIN
 # ==========================
+
 @app.route('/admin_login', methods=['GET', 'POST'])
 def admin_login():
     if request.method == 'POST':
-        username = request.form['username']
-        password = request.form['password']
+        username = request.form['username'].strip()
+        password = request.form['password'].strip()
 
         cur = mysql.connection.cursor()
         cur.execute("""
@@ -101,18 +102,22 @@ def admin_login():
         admin = cur.fetchone()
         cur.close()
 
+        # ❌ Admin not found
         if not admin:
             return "<h4 style='color:red;'>Admin Not Found ❌</h4>"
 
+        # 🔍 DEBUG (remove later)
+        print("ENTERED:", password)
+        print("DB HASH:", admin[2])
+        print("CHECK:", check_password_hash(admin[2], password))
+
+        # ✅ Password check
         if check_password_hash(admin[2], password):
             session.clear()
-
             session['admin_id'] = admin[0]
             session['admin_name'] = admin[1]
             session['admin_dept'] = admin[3]
             session['admin_level'] = admin[4]
-
-            print("LOGIN DEBUG:", admin[1], "Dept:", admin[3], "Level:", admin[4])
 
             return redirect(url_for('admin_dashboard'))
 
