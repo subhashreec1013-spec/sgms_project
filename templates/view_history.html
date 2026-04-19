@@ -21,33 +21,65 @@
 
 <body>
 
-<div class="card shadow update-card">
+<div class="container mt-5">
 
-    <h4 class="text-center mb-4">Update Grievance Status</h4>
+    <h2 class="text-center mb-4">Grievance History</h2>
 
-    <form method="POST">
+    {% if logs %}
+    <div class="card shadow">
+        <div class="card-body">
 
-        <div class="mb-3">
-            <label>Select New Status</label>
-            <select name="status" class="form-select" required>
-                <option value="">-- Select Status --</option>
-                <option>Pending</option>
-                <option>In Progress</option>
-                <option>Resolved</option>
-            </select>
+            <table class="table table-bordered table-hover text-center">
+                <thead class="table-dark">
+                    <tr>
+                        <th>Status</th>
+                        <th>Remarks</th>
+                        <th>Updated Date</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    {% for log in logs %}
+                    <tr>
+                        <td>
+                            {% if log[0] == 'Resolved' %}
+                                <span class="badge bg-success">Resolved</span>
+                            {% elif log[0] == 'Rejected' %}
+                                <span class="badge bg-danger">Rejected</span>
+                            {% elif log[0] == 'In Progress' %}
+                                <span class="badge bg-warning text-dark">In Progress</span>
+                            {% else %}
+                                <span class="badge bg-secondary">Pending</span>
+                            {% endif %}
+                        </td>
+
+                        <td>{{ log[1] if log[1] else "No Remarks" }}</td>
+
+                        <td>{{ log[2] }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+
+            </table>
+
         </div>
+    </div>
 
-        <button type="submit" class="btn btn-success w-100 mb-2">
-            Update Status
-        </button>
+    {% else %}
+        <div class="alert alert-info text-center">
+            No history available for this grievance.
+        </div>
+    {% endif %}
 
-        <a href="/admin_dashboard" class="btn btn-secondary w-100">
-            Cancel
+    <!-- Back Button -->
+    <div class="text-center mt-4">
+        <a href="{{ url_for('admin_dashboard') }}" class="btn btn-secondary">
+            ← Back to Dashboard
         </a>
-
-    </form>
+    </div>
 
 </div>
 
 </body>
+
 </html>
