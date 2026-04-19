@@ -128,6 +128,21 @@ def admin_login():
             return "<h4 style='color:red;'>Invalid Password ❌</h4>"
 
     return render_template('admin_login.html')
+#==============================
+# ADMINN PASSWORD FIX (TEMPORARY)
+#==============================
+@app.route('/fix_admin_password')
+def fix_admin_password():
+    from werkzeug.security import generate_password_hash
+
+    new_hash = generate_password_hash("admin123")
+
+    cur = mysql.connection.cursor()
+    cur.execute("UPDATE admin SET password=%s", (new_hash,))
+    mysql.connection.commit()
+    cur.close()
+
+    return f"Password Updated Successfully ✅ <br>{new_hash}"
 
 # ==========================
 # ADMIN DASHBOARD (FIXED)
