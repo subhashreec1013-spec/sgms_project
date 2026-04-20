@@ -535,7 +535,6 @@ def dashboard():
         'dashboard.html',
         student=student
     )
-
 def smart_detect(description):
 
     text = description.lower()
@@ -544,16 +543,42 @@ def smart_detect(description):
     # DEPARTMENT KEYWORDS
     # ==========================
     dept_keywords = {
-
-        "Academic": ["class", "syllabus", "assignment", "attendance", "course"],
-        "Faculty": ["teacher", "faculty", "mentor", "professor"],
-        "Examination": ["exam", "marks", "result", "grade", "revaluation"],
-        "Hostel": ["hostel", "room", "warden", "mess", "water", "electricity"],
-        "Library": ["library", "books", "librarian", "study"],
-        "Transport": ["bus", "transport", "driver", "route"],
-        "Finance": ["fee", "payment", "refund", "scholarship"],
-        "Infrastructure": ["building", "classroom", "lab", "maintenance"],
-        "Placement": ["placement", "internship", "company", "recruitment"]
+        "Academic": [
+            "class", "syllabus", "assignment", "attendance",
+            "course", "lecture", "subject", "notes"
+        ],
+        "Faculty": [
+            "teacher", "faculty", "mentor", "professor",
+            "staff", "sir", "madam"
+        ],
+        "Examination": [
+            "exam", "marks", "result", "grade",
+            "revaluation", "internal", "external", "question paper"
+        ],
+        "Hostel": [
+            "hostel", "room", "warden", "mess",
+            "food", "water", "electricity", "cleaning"
+        ],
+        "Library": [
+            "library", "books", "librarian",
+            "study", "reading", "issue book"
+        ],
+        "Transport": [
+            "bus", "transport", "driver",
+            "route", "pickup", "drop", "delay bus"
+        ],
+        "Finance": [
+            "fee", "payment", "refund",
+            "scholarship", "fine", "receipt"
+        ],
+        "Infrastructure": [
+            "building", "classroom", "lab",
+            "maintenance", "fan", "light", "bench", "equipment"
+        ],
+        "Placement": [
+            "placement", "internship", "company",
+            "recruitment", "job", "interview"
+        ]
     }
 
     # ==========================
@@ -561,13 +586,22 @@ def smart_detect(description):
     # ==========================
 
     high_severity = [
-        "harassment","urgent","violence","marks wrong",
-        "result error","fee error","exam issue"
+        "urgent", "immediately", "asap", "critical",
+        "harassment", "violence", "threat",
+        "marks wrong", "result error", "fee error",
+        "wrong result", "serious issue", "complaint"
     ]
 
     medium_severity = [
-        "wifi","internet","hostel","transport",
-        "library","lab","water"
+        "issue", "problem", "delay", "not working",
+        "wifi", "internet", "network", "slow",
+        "water problem", "electricity issue",
+        "bus delay", "lab issue"
+    ]
+
+    low_severity = [
+        "request", "doubt", "clarification",
+        "suggestion", "minor", "enquiry"
     ]
 
     # ==========================
@@ -577,28 +611,37 @@ def smart_detect(description):
     detected_dept = "Others"
 
     for dept, words in dept_keywords.items():
-        for word in words:
-            if word in text:
-                detected_dept = dept
-                break
+        if any(word in text for word in words):
+            detected_dept = dept
+            break
 
     # ==========================
-    # DETECT SEVERITY
+    # DETECT SEVERITY (SCORING)
     # ==========================
 
-    severity = "Low"
-    priority = 1
+    score = 0
 
     for word in high_severity:
         if word in text:
-            severity = "High"
-            priority = 3
-            break
+            score += 3
 
     for word in medium_severity:
-        if word in text and severity != "High":
-            severity = "Medium"
-            priority = 2
+        if word in text:
+            score += 2
+
+    for word in low_severity:
+        if word in text:
+            score += 1
+
+    if score >= 5:
+        severity = "High"
+        priority = 3
+    elif score >= 3:
+        severity = "Medium"
+        priority = 2
+    else:
+        severity = "Low"
+        priority = 1
 
     return detected_dept, severity, priority
 
