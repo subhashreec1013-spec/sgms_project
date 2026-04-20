@@ -616,22 +616,21 @@ def smart_detect(description):
             break
 
     # ==========================
-    # DETECT SEVERITY (SCORING)
+    # DETECT SEVERITY (FINAL FIX)
     # ==========================
 
-    score = 0
-
+    # HIGH has priority → check first
     for word in high_severity:
         if word in text:
-            score += 3
+           return detected_dept, "High", 3
 
+    # MEDIUM check
     for word in medium_severity:
         if word in text:
-            score += 2
+           return detected_dept, "Medium", 2
 
-    for word in low_severity:
-        if word in text:
-            score += 1
+    # LOW default
+    return detected_dept, "Low", 1
 
     if score >= 5:
         severity = "High"
@@ -644,6 +643,9 @@ def smart_detect(description):
         priority = 1
 
     return detected_dept, severity, priority
+
+
+
 
 # ==========================
 # RAISE GRIEVANCE
