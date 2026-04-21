@@ -145,7 +145,7 @@ def fix_admin_password():
     return f"Password Updated Successfully ✅ <br>{new_hash}"
 
 # ==========================
-# ADMIN DASHBOARD (FINAL FIXED)
+# ADMIN DASHBOARD (FIXED)
 # ==========================
 @app.route('/admin_dashboard')
 def admin_dashboard():
@@ -154,13 +154,12 @@ def admin_dashboard():
 
     admin_level = session['admin_level']
     admin_dept = session['admin_dept']
-    admin_name = session['admin_name']
 
     cur = mysql.connection.cursor()
 
-    # ================= AUTO ESCALATION (FIXED) =================
+    # ================= AUTO ESCALATION =================
     cur.execute("""
-        SELECT grievance_id, current_level, category
+        SELECT grievance_id, current_level
         FROM grievance
         WHERE status != 'Resolved'
           AND DATEDIFF(CURDATE(), created_date) >= 2
@@ -168,49 +167,30 @@ def admin_dashboard():
 
     old_grievances = cur.fetchall()
 
-    hierarchy_depts = ["Academic", "Faculty", "Examination"]
-
     for g in old_grievances:
         gid = g[0]
         level = g[1]
-        dept = g[2]
 
-        # 🔥 Apply correct escalation logic
-        if dept in hierarchy_depts:
-            if level == 1:
-                new_level = 2
-            elif level == 2:
-                new_level = 4
-            else:
-                continue  # already at Dean
+        if level < 3:
+            cur.execute("""
+                UPDATE grievance
+                SET current_level = current_level + 1,
+                    status = 'Auto Escalated'
+                WHERE grievance_id = %s
+            """, (gid,))
 
-        else:
-            if level == 3:
-                new_level = 4
-            else:
-                continue  # no escalation needed
-
-        # Update grievance
-        cur.execute("""
-            UPDATE grievance
-            SET current_level = %s,
-                status = 'Auto Escalated'
-            WHERE grievance_id = %s
-        """, (new_level, gid))
-
-        # Log entry
-        cur.execute("""
-            INSERT INTO grievance_log
-            (grievance_id, action_by, status, remarks)
-            VALUES (%s, %s, %s, %s)
-        """, (gid, None,
-              'Auto Escalated',
-              'System auto-escalated after 2 days delay'))
+            cur.execute("""
+                INSERT INTO grievance_log
+                (grievance_id, action_by, status, remarks)
+                VALUES (%s, %s, %s, %s)
+            """, (gid, None,
+                  'Auto Escalated',
+                  'System auto-escalated after 2 days delay'))
 
     mysql.connection.commit()
 
-    # ================= SUPER ADMIN (LEVEL 5) =================
-    if admin_level == 5:
+    # ================= SUPER ADMIN =================
+    if admin_level == 4:
         cur.execute("""
             SELECT grievance_id, student_id, category, severity_level,
                    priority_score, status, created_date, description
@@ -234,85 +214,86 @@ def admin_dashboard():
         cur.execute("SELECT COUNT(*) FROM grievance WHERE status='Rejected'")
         rejected = cur.fetchone()[0]
 
-    # ================= DEAN (LEVEL 4) =================
-    elif admin_level == 4 or admin_name == 'Dean':
+    # ================= DEAN =================
+    elif session.get('admin_name') == 'Dean':
 
         cur.execute("""
             SELECT grievance_id, student_id, category, severity_level,
                    priority_score, status, created_date, description
             FROM grievance
-            WHERE current_level = 4
+            WHERE current_level = 3
             ORDER BY grievance_id DESC
         """)
         grievances = cur.fetchall()
 
-        cur.execute("SELECT COUNT(*) FROM grievance WHERE current_level = 4")
+        cur.execute("SELECT COUNT(*) FROM grievance WHERE current_level = 3")
         total = cur.fetchone()[0]
 
         cur.execute("""
             SELECT COUNT(*) FROM grievance
-            WHERE current_level = 4 AND status='Pending'
+            WHERE current_level = 3 AND status='Pending'
         """)
         pending = cur.fetchone()[0]
 
         cur.execute("""
             SELECT COUNT(*) FROM grievance
-            WHERE current_level = 4 AND status='In Progress'
+            WHERE current_level = 3 AND status='In Progress'
         """)
         in_progress = cur.fetchone()[0]
 
         cur.execute("""
             SELECT COUNT(*) FROM grievance
-            WHERE current_level = 4 AND status='Resolved'
+            WHERE current_level = 3 AND status='Resolved'
         """)
         resolved = cur.fetchone()[0]
 
         cur.execute("""
             SELECT COUNT(*) FROM grievance
-            WHERE current_level = 4 AND status='Rejected'
+            WHERE current_level = 3 AND status='Rejected'
         """)
         rejected = cur.fetchone()[0]
 
     # ================= OTHER ADMINS =================
     else:
 
+        # 🔥 FIXED: removed current_level filter
         cur.execute("""
             SELECT grievance_id, student_id, category, severity_level,
                    priority_score, status, created_date, description
             FROM grievance
-            WHERE dept_id = %s AND current_level = %s
+            WHERE dept_id = %s
             ORDER BY grievance_id DESC
-        """, (admin_dept, admin_level))
+        """, (admin_dept,))
         grievances = cur.fetchall()
 
         cur.execute("""
             SELECT COUNT(*) FROM grievance
-            WHERE dept_id = %s AND current_level = %s
-        """, (admin_dept, admin_level))
+            WHERE dept_id = %s
+        """, (admin_dept,))
         total = cur.fetchone()[0]
 
         cur.execute("""
             SELECT COUNT(*) FROM grievance
-            WHERE dept_id = %s AND current_level = %s AND status='Pending'
-        """, (admin_dept, admin_level))
+            WHERE dept_id = %s AND status='Pending'
+        """, (admin_dept,))
         pending = cur.fetchone()[0]
 
         cur.execute("""
             SELECT COUNT(*) FROM grievance
-            WHERE dept_id = %s AND current_level = %s AND status='In Progress'
-        """, (admin_dept, admin_level))
+            WHERE dept_id = %s AND status='In Progress'
+        """, (admin_dept,))
         in_progress = cur.fetchone()[0]
 
         cur.execute("""
             SELECT COUNT(*) FROM grievance
-            WHERE dept_id = %s AND current_level = %s AND status='Resolved'
-        """, (admin_dept, admin_level))
+            WHERE dept_id = %s AND status='Resolved'
+        """, (admin_dept,))
         resolved = cur.fetchone()[0]
 
         cur.execute("""
             SELECT COUNT(*) FROM grievance
-            WHERE dept_id = %s AND current_level = %s AND status='Rejected'
-        """, (admin_dept, admin_level))
+            WHERE dept_id = %s AND status='Rejected'
+        """, (admin_dept,))
         rejected = cur.fetchone()[0]
 
     cur.close()
@@ -320,7 +301,7 @@ def admin_dashboard():
     return render_template(
         'admin_dashboard.html',
         grievances=grievances,
-        name=admin_name,
+        name=session['admin_name'],
         total=total,
         pending=pending,
         in_progress=in_progress,
@@ -425,7 +406,6 @@ def resolve_grievance(gid):
 # ==========================
 # ESCALATE
 # ==========================
-
 @app.route('/escalate/<int:gid>')
 def escalate_grievance(gid):
     if 'admin_id' not in session:
@@ -433,9 +413,9 @@ def escalate_grievance(gid):
 
     cur = mysql.connection.cursor()
 
-    # Get current level + department
+    # Get current level of grievance
     cur.execute("""
-        SELECT current_level, department
+        SELECT current_level
         FROM grievance
         WHERE grievance_id = %s
     """, (gid,))
@@ -445,53 +425,68 @@ def escalate_grievance(gid):
         cur.close()
         return redirect(url_for('admin_dashboard'))
 
-    current_level, dept = result
+    current_level = result[0]
 
-    # 🔥 Departments with full hierarchy
-    hierarchy_depts = ["Academic", "Faculty", "Examination"]
+    # 🔥 Escalate only till level 3
+    if current_level < 3:
+        new_level = current_level + 1
 
-    # ==========================
-    # ESCALATION LOGIC
-    # ==========================
+        cur.execute("""
+            UPDATE grievance
+            SET current_level = %s,
+                status = 'In Progress'
+            WHERE grievance_id = %s
+        """, (new_level, gid))
 
-    if dept in hierarchy_depts:
-        # Mentor → HOD → Dean
-        if current_level == 1:
-            new_level = 2
-        elif current_level == 2:
-            new_level = 4
-        else:
-            new_level = 4  # already at Dean
+        cur.execute("""
+            INSERT INTO grievance_log (grievance_id, action_by, status, remarks)
+            VALUES (%s, %s, %s, %s)
+        """, (gid, session['admin_id'], 'Escalated', 'Escalated to next level'))
 
     else:
-        # Admin → Dean directly
-        if current_level == 3:
-            new_level = 4
-        else:
-            new_level = current_level  # safety fallback
-
-    # ==========================
-    # UPDATE DB
-    # ==========================
-
-    cur.execute("""
-        UPDATE grievance
-        SET current_level = %s,
-            status = 'In Progress'
-        WHERE grievance_id = %s
-    """, (new_level, gid))
-
-    # Log entry
-    cur.execute("""
-        INSERT INTO grievance_log (grievance_id, action_by, status, remarks)
-        VALUES (%s, %s, %s, %s)
-    """, (gid, session['admin_id'], 'Escalated', 'Escalated to next level'))
+        # Already at dean level → cannot escalate further
+        cur.execute("""
+            UPDATE grievance
+            SET status = 'In Progress'
+            WHERE grievance_id = %s
+        """, (gid,))
 
     mysql.connection.commit()
     cur.close()
 
     return redirect(url_for('admin_dashboard'))
+# ==========================
+# UPDATE SEVERITY (ADMIN OVERRIDE)
+# ==========================
+@app.route('/update_severity/<int:gid>', methods=['POST'])
+def update_severity(gid):
+    if 'admin_id' not in session:
+        return redirect(url_for('admin_login'))
 
+    new_severity = request.form['severity_level']
+
+    # Update priority based on severity
+    priority_score = 3 if new_severity == "High" else 2 if new_severity == "Medium" else 1
+
+    cur = mysql.connection.cursor()
+
+    # Update grievance table
+    cur.execute("""
+        UPDATE grievance
+        SET severity_level=%s, priority_score=%s
+        WHERE grievance_id=%s
+    """, (new_severity, priority_score, gid))
+
+    # Insert log entry
+    cur.execute("""
+        INSERT INTO grievance_log (grievance_id, status, remarks)
+        VALUES (%s, %s, %s)
+    """, (gid, "Severity Updated", f"Severity changed to {new_severity} by admin"))
+
+    mysql.connection.commit()
+    cur.close()
+
+    return redirect(url_for('admin_dashboard'))
 # ==========================
 # VIEW HISTORY(ADMIN)
 # ==========================
@@ -533,14 +528,13 @@ def dashboard():
     """, (session['student_id'],))
 
     student = cur.fetchone()
+
     cur.close()
 
-    return render_template('dashboard.html', student=student)
-
-
-# ==========================
-# SMART DETECTION (FINAL CLEAN)
-# ==========================
+    return render_template(
+        'dashboard.html',
+        student=student
+    )
 def smart_detect(description):
 
     text = description.lower()
@@ -549,70 +543,112 @@ def smart_detect(description):
     # DEPARTMENT KEYWORDS
     # ==========================
     dept_keywords = {
-        "Academic": ["class", "syllabus", "assignment", "attendance", "course", "lecture", "subject"],
-        "Faculty": ["teacher", "faculty", "mentor", "professor", "staff"],
-        "Examination": ["exam", "marks", "result", "grade", "revaluation"],
-        "Hostel": ["hostel", "room", "warden", "mess", "food", "water"],
-        "Library": ["library", "books", "librarian", "study"],
-        "Transport": ["bus", "transport", "driver", "route", "pickup", "drop"],
-        "Finance": ["fee", "payment", "refund", "scholarship", "fine"],
-        "Infrastructure": ["building", "classroom", "lab", "maintenance", "fan", "light"],
-        "Placement": ["placement", "internship", "company", "job", "interview"]
+        "Academic": [
+            "class", "syllabus", "assignment", "attendance",
+            "course", "lecture", "subject", "notes"
+        ],
+        "Faculty": [
+            "teacher", "faculty", "mentor", "professor",
+            "staff", "sir", "madam"
+        ],
+        "Examination": [
+            "exam", "marks", "result", "grade",
+            "revaluation", "internal", "external", "question paper"
+        ],
+        "Hostel": [
+            "hostel", "room", "warden", "mess",
+            "food", "water", "electricity", "cleaning"
+        ],
+        "Library": [
+            "library", "books", "librarian",
+            "study", "reading", "issue book"
+        ],
+        "Transport": [
+            "bus", "transport", "driver",
+            "route", "pickup", "drop", "delay bus"
+        ],
+        "Finance": [
+            "fee", "payment", "refund",
+            "scholarship", "fine", "receipt"
+        ],
+        "Infrastructure": [
+            "building", "classroom", "lab",
+            "maintenance", "fan", "light", "bench", "equipment"
+        ],
+        "Placement": [
+            "placement", "internship", "company",
+            "recruitment", "job", "interview"
+        ]
     }
 
+    # ==========================
+    # SEVERITY KEYWORDS
+    # ==========================
+
+    high_severity = [
+        "urgent", "immediately", "asap", "critical",
+        "harassment", "violence", "threat",
+        "marks wrong", "result error", "fee error",
+        "wrong result", "serious issue", "complaint"
+    ]
+
+    medium_severity = [
+        "issue", "problem", "delay", "not working",
+        "wifi", "internet", "network", "slow",
+        "water problem", "electricity issue",
+        "bus delay", "lab issue"
+    ]
+
+    low_severity = [
+        "request", "doubt", "clarification",
+        "suggestion", "minor", "enquiry"
+    ]
+
+    # ==========================
+    # DETECT DEPARTMENT
+    # ==========================
+
     detected_dept = "Others"
+
     for dept, words in dept_keywords.items():
-        for word in words:
-            if word in text:
-                detected_dept = dept
-                break
-        if detected_dept != "Others":
+        if any(word in text for word in words):
+            detected_dept = dept
             break
 
     # ==========================
-    # SEVERITY KEYWORDS (FIXED)
+    # DETECT SEVERITY (FINAL FIX)
     # ==========================
 
-    high_keywords = [
-        "urgent", "immediately", "asap",
-        "harassment", "violence", "threat",
-        "marks wrong", "wrong marks",
-        "result error", "fee error",
-        "serious issue"
-    ]
-
-    medium_keywords = [
-        "delay", "not working",
-        "wifi issue", "internet issue",
-        "bus delay", "water problem",
-        "electricity issue"
-    ]
-
-    low_keywords = [
-        "request", "doubt", "clarification",
-        "suggestion", "enquiry"
-    ]
-
-    # HIGH
-    for word in high_keywords:
+    # HIGH has priority → check first
+    for word in high_severity:
         if word in text:
-            return detected_dept, "High", 3
+           return detected_dept, "High", 3
 
-    # MEDIUM
-    for word in medium_keywords:
+    # MEDIUM check
+    for word in medium_severity:
         if word in text:
-            return detected_dept, "Medium", 2
+           return detected_dept, "Medium", 2
 
-    # LOW
-    for word in low_keywords:
-        if word in text:
-            return detected_dept, "Low", 1
-
+    # LOW default
     return detected_dept, "Low", 1
+
+    if score >= 5:
+        severity = "High"
+        priority = 3
+    elif score >= 3:
+        severity = "Medium"
+        priority = 2
+    else:
+        severity = "Low"
+        priority = 1
+
+    return detected_dept, severity, priority
+
+
 
 
 # ==========================
-# RAISE GRIEVANCE (FINAL FIXED)
+# RAISE GRIEVANCE
 # ==========================
 @app.route('/raise_grievance', methods=['GET', 'POST'])
 def raise_grievance():
@@ -624,22 +660,32 @@ def raise_grievance():
 
         category = request.form['category']
         description = request.form['description']
+        issue_type = request.form.get('issue_type', 'general')
 
         # 🔥 AI detection
-        detected_dept, severity_level, priority_score = smart_detect(description)
+        detected_dept, severity_level, auto_priority = smart_detect(description)
+
+        # 🔥 Synchronize severity with AI priority
+        if auto_priority == 3:
+           severity_level = "High"
+        elif auto_priority == 2:
+           severity_level = "Medium"
+        else:
+           severity_level = "Low"
 
         student_id = session['student_id']
 
-        # Fallback if AI fails
+        # 🔥 If AI cannot detect department → fallback to selected category
         dept_name = detected_dept if detected_dept != "Others" else category
 
         cur = mysql.connection.cursor()
 
-        # Get department ID
+        # 🔥 Fetch department id
         cur.execute(
             "SELECT dept_id FROM department WHERE dept_name=%s",
             (dept_name,)
         )
+
         dept = cur.fetchone()
 
         if not dept:
@@ -648,21 +694,23 @@ def raise_grievance():
 
         dept_id = dept[0]
 
-        # ==========================
-        # START LEVEL LOGIC (FIXED)
-        # ==========================
+        # Priority determined by AI
+        priority_score = auto_priority
 
-        # Academic / Faculty / Exam → start at Mentor
-        if dept_id in (1, 4, 6):
+        # 🔥 Multi-level routing logic
+        if dept_id in (1, 4, 6):  # Academic / Faculty / Examination
+            if issue_type == "general":
+                start_level = 1
+            elif issue_type == "mentor":
+                start_level = 2
+            elif issue_type == "hod":
+                start_level = 3
+            else:
+                start_level = 1
+        else:
             start_level = 1
 
-        # Other departments → directly to Admin
-        else:
-            start_level = 3
-
-        # ==========================
-        # INSERT GRIEVANCE
-        # ==========================
+        # 🔥 Insert grievance
         cur.execute("""
             INSERT INTO grievance
             (description, category, priority_score, status,
@@ -670,7 +718,7 @@ def raise_grievance():
             VALUES (%s,%s,%s,%s,%s,CURDATE(),%s,%s,%s)
         """, (
             description,
-            dept_name,
+            dept_name,   # ✅ store detected department
             priority_score,
             "Pending",
             severity_level,
@@ -679,11 +727,11 @@ def raise_grievance():
             start_level
         ))
 
-        # Get grievance ID
+        # 🔥 Get inserted grievance ID
         cur.execute("SELECT LAST_INSERT_ID()")
         gid = cur.fetchone()[0]
 
-        # Insert log
+        # 🔥 Insert log entry
         cur.execute("""
             INSERT INTO grievance_log
             (grievance_id, action_by, status, remarks)
@@ -701,6 +749,7 @@ def raise_grievance():
         return "<h4 style='color:green;'>Grievance Routed to " + dept_name + " Department ✅</h4>"
 
     return render_template('raise_grievance.html')
+
 # ==========================
 # MY GRIEVANCES
 # ==========================
