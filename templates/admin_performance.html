@@ -63,7 +63,7 @@ height:280px;
                 <a class="nav-link" href="/admin_dashboard">Dashboard</a>
             </li>
 
-            {% if session.get('admin_level') == 4 %}
+            {% if session.get('admin_level') == 5 %}
             <li class="nav-item">
                 <a class="nav-link {% if request.path == '/admin_performance' %}active fw-bold{% endif %}" href="/admin_performance">
                    Performance
