@@ -408,10 +408,18 @@ def escalate_grievance(gid):
     level, dept = data
 
     if dept in (1, 4, 6):
-        new_level = level + 1 if level < 4 else level
+
+       if level == 1:
+           new_level = 2
+       elif level == 2:
+           new_level = 4
+       elif level == 3:
+           new_level = 4
+       else:
+           new_level = level
+
     else:
         new_level = 4 if level < 4 else level
-
     cur.execute("""
         UPDATE grievance
         SET current_level=%s, status='In Progress'
@@ -525,7 +533,7 @@ def smart_detect(description):
 
     high_words = [
         "urgent", "immediately", "asap", "harassment", "violence", "threat",
-        "wrong", "error", "serious", "complaint"
+        "wrong", "error", "serious", "complaint", "violence", "abuse", "result error"
     ]
 
     medium_words = [
