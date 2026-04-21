@@ -548,18 +548,19 @@ def smart_detect(description):
 
     for word in high_words:
         if word in text:
-            score += 2
+           score += 2
 
     for word in medium_words:
         if word in text:
-            score += 1
+           score += 1
 
-    if score >= 3:
-        return detected_dept, "High", 3
-    elif score >= 1:
-        return detected_dept, "Medium", 2
+    # 🚀 FIXED THRESHOLD
+    if score >= 4:
+       return detected_dept, "High", 3
+    elif score >= 2:
+       return detected_dept, "Medium", 2
     else:
-        return detected_dept, "Low", 1
+       return detected_dept, "Low", 1
 
 
 # ==========================
@@ -601,7 +602,21 @@ def raise_grievance():
 
         dept_id = dept[0]
         priority_score = auto_priority
-        start_level = 1
+        # 🔥 Multi-level departments
+        if dept_id in (1, 4, 6):   # Academic / Faculty / Exam
+
+           if issue_type == "general":
+              start_level = 1   # Mentor
+           elif issue_type == "mentor":
+              start_level = 2   # HOD
+           elif issue_type == "hod":
+              start_level = 3   # Direct higher
+           else:
+              start_level = 1
+
+        # 🔥 Single-admin departments
+        else:
+           start_level = 3   # Direct to Admin
 
         cur.execute("""
             INSERT INTO grievance
