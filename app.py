@@ -160,7 +160,7 @@ def admin_dashboard():
 
     # ================= AUTO ESCALATION (FIXED) =================
     cur.execute("""
-        SELECT grievance_id, current_level, department
+        SELECT grievance_id, current_level, category
         FROM grievance
         WHERE status != 'Resolved'
           AND DATEDIFF(CURDATE(), created_date) >= 2
