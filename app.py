@@ -533,7 +533,9 @@ def smart_detect(description):
 
     high_words = [
         "urgent", "immediately", "asap", "harassment", "violence", "threat",
-        "wrong", "error", "serious", "complaint", "violence", "abuse", "result error"
+        "wrong", "error", "serious", "complaint", "violence", "abuse", "result error", 
+        "marks wrong", "wrong marks", "fee error", "serious", "critical", "emergency", 
+        "danger", "severe", "extreme", "major","wrong result"
     ]
 
     medium_words = [

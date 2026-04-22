@@ -34,11 +34,15 @@
         /* ===== CHART SIZE FIX ===== */
         .chart-box {
             height: 350px;
+            padding: 15px;
+            overflow: hidden;
         }
 
         canvas {
-            max-height: 320px !important;
+            width: 100% !important;
+            height: 100% !important;
         }
+
     </style>
 </head>
 
@@ -319,7 +323,15 @@
             },
             options: {
                 responsive: true,
-                maintainAspectRatio: false
+                maintainAspectRatio: false,
+                layout: {
+                    padding: 10
+                },
+                plugins: {
+                   legend: {
+                      position: 'top'
+                   }
+                }
             }
         });
 
@@ -335,7 +347,15 @@
             },
             options: {
                 responsive: true,
-                maintainAspectRatio: false
+                maintainAspectRatio: false,
+                layout: {
+                    padding: 10
+                },
+                plugins: {
+                   legend: {
+                      position: 'top'
+                   }
+                }
             }
         });
     </script>
